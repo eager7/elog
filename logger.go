@@ -1,40 +1,79 @@
 package elog
 
 import (
+	"flag"
 	"fmt"
-	"github.com/BlockABC/wallet_eth_client/common/elog/bunnystub"
-	"github.com/BlockABC/wallet_eth_client/common/elog/logbunny"
-	"github.com/spf13/viper"
+	"github.com/eager7/elog/bunnystub"
+	"github.com/eager7/elog/logbunny"
 	"io"
-	"net/http"
 	"os"
+	"path/filepath"
 	"runtime/debug"
 	"strconv"
+	"strings"
 )
 
-type loggerOpt struct {
-	debugLevel         logbunny.LogLevel
-	loggerType         logbunny.LogType
-	withCaller         bool
-	toTerminal         bool
-	loggerEncoder      logbunny.EncoderType
-	timePattern        string
-	debugLogFilename   string
-	infoLogFilename    string
-	warnLogFilename    string
-	errorLogFilename   string
-	fatalLogFilename   string
-	httpPort           string
-	rollingTimePattern string
-	skip               int
-	logger             logbunny.Logger
+var defaultLog logbunny.Logger //default logger
+var loggerEncoder logbunny.EncoderType
+
+// Zap & logrus level is not the same so we defined our level
+const (
+	DebugLevel = iota
+	InfoLevel
+	WarnLevel
+	ErrorLevel
+	PanicLevel
+	FatalLevel
+)
+
+const (
+	colorRed = iota + 91
+	colorGreen
+	colorYellow
+	colorBlue
+	colorMagenta
+)
+
+type loggerModule struct {
+	name  string
+	level int //debug-0 info-1 warn-2 err-3 panic-4 fatal-5
 }
 
-var Log Logger //default logger
-var levelHandler *logbunny.HTTPHandler
+type Logger interface {
+	Notice(a ...interface{})
+	Debug(a ...interface{})
+	Info(a ...interface{})
+	Warn(a ...interface{})
+	Error(a ...interface{})
+	Fatal(a ...interface{})
+	Panic(a ...interface{})
+	GetLogger() logbunny.Logger
+	SetLogLevel(level int) error
+	GetLogLevel() int
+	ErrStack()
+}
 
-func Initialize(dir string) error {
-	//fmt.Println("init log, baseDir:", dir)
+func NewLogger(module string, level int) *loggerModule {
+	return &loggerModule{name: module, level: level}
+}
+
+func init() {
+	if err := Initialize(); err != nil {
+		panic(err)
+	}
+}
+
+func Initialize() error {
+	var dir string
+	if flag.Lookup("test.v") == nil {
+		dir, _ = filepath.Abs(filepath.Dir(os.Args[0]))
+		dir = strings.Replace(dir, "\\", "/", -1)
+	} else {
+		dir = "/tmp"
+	}
+	flag.Parse()
+	dir += "/log/" + os.Args[0][strings.LastIndex(os.Args[0], `/`)+1:] + "_"
+
 	logOpt, err := newLoggerOpt()
 	if err != nil {
 		return err
@@ -60,7 +99,7 @@ func Initialize(dir string) error {
 			outputWriter[level] = []io.Writer{logFileWriter}
 		}
 	}
-
+	loggerEncoder = logOpt.loggerEncoder
 	zapCfg := &logbunny.Config{
 		Type:        logOpt.loggerType,
 		Level:       logOpt.debugLevel,
@@ -71,62 +110,15 @@ func Initialize(dir string) error {
 		TimePattern: logOpt.timePattern,
 		Skip:        logOpt.skip,
 	}
-	logOpt.logger, err = logbunny.FilterLogger(zapCfg, outputWriter)
+	l, err := logbunny.FilterLogger(zapCfg, outputWriter)
 	if err != nil {
 		return err
 	}
 
 	logbunny.SetCallerSkip(3)
 	// log.Warp()
-
-	levelHandler = logbunny.NewHTTPHandler(logOpt.logger)
-	http.HandleFunc("/logoutLevel", func(w http.ResponseWriter, r *http.Request) {
-		levelHandler.ServeHTTP(w, r)
-	})
-	go func() {
-		if err := http.ListenAndServe(logOpt.httpPort, nil); err != nil {
-			fmt.Println(err)
-		}
-	}()
-	Log = logOpt
+	defaultLog = l
 	return nil
-}
-
-func newLoggerOpt() (*loggerOpt, error) {
-	return &loggerOpt{
-		debugLevel:         logbunny.LogLevel(viper.GetInt("log.debug_level")),
-		loggerType:         logbunny.LogType(viper.GetInt("log.loggerType")),
-		withCaller:         viper.GetBool("log.with_caller"),
-		toTerminal:         viper.GetBool("log.to_terminal"),
-		loggerEncoder:      logbunny.EncoderType(viper.GetInt("log.logger_encoder")),
-		timePattern:        viper.GetString("log.time_pattern"),
-		debugLogFilename:   viper.GetString("log.debug_log_filename"),
-		infoLogFilename:    viper.GetString("log.info_log_filename"),
-		warnLogFilename:    viper.GetString("log.warn_log_filename"),
-		errorLogFilename:   viper.GetString("log.error_log_filename"),
-		fatalLogFilename:   viper.GetString("log.fatal_log_filename"),
-		httpPort:           viper.GetString("log.http_port"),
-		rollingTimePattern: viper.GetString("log.rolling_time_pattern"),
-		skip:               viper.GetInt("log.skip"),
-		logger:             nil,
-	}, nil
-}
-
-func InitDefaultConfig() {
-	viper.SetDefault("log.debug_level", 0) //0: debug 1: info 2: warn 3: error 4: panic 5: fatal
-	viper.SetDefault("log.loggerType", 0)  //0: zap 1: logrus
-	viper.SetDefault("log.with_caller", false)
-	viper.SetDefault("log.logger_encoder", 1) //0: json 1: console
-	viper.SetDefault("log.time_pattern", "2006-01-02 15:04:05.00000")
-	viper.SetDefault("log.http_port", ":50015")                 // RESTFul API to change logout level dynamically
-	viper.SetDefault("log.debug_log_filename", "debug.log")       //or 'stdout' / 'stderr'
-	viper.SetDefault("log.info_log_filename", "debug.log")        //or 'stdout' / 'stderr'
-	viper.SetDefault("log.warn_log_filename", "warn.log")       //or 'stdout' / 'stderr'
-	viper.SetDefault("log.error_log_filename", "err.log")       //or 'stdout' / 'stderr'
-	viper.SetDefault("log.fatal_log_filename", "fatal.log")       //or 'stdout' / 'stderr'
-	viper.SetDefault("log.rolling_time_pattern", "0 0 0 * * *") //rolling the log everyday at 00:00:00
-	viper.SetDefault("log.skip", 4)                             //call depth, zap log is 3, logger is 4
-	viper.SetDefault("log.to_terminal", true)                   //out put to terminal
 }
 
 func newLogFile(logPath string, rollingTimePattern string) (io.Writer, error) {
@@ -150,101 +142,102 @@ func stdOutput(logPath string) *os.File {
 	return nil
 }
 
-const (
-	colorRed = iota + 91
-	colorGreen
-	colorYellow
-	colorBlue
-	colorMagenta
-)
-
-type Logger interface {
-	Notice(a ...interface{})
-	Debug(a ...interface{})
-	Info(a ...interface{})
-	Warn(a ...interface{})
-	Error(a ...interface{})
-	Fatal(a ...interface{})
-	Panic(a ...interface{})
-	GetLogger() logbunny.Logger
-	ErrStack()
-	SetLogLevel(level int) error
-	//GetLogLevel() int
-}
-
-func (l *loggerOpt) Notice(a ...interface{}) {
-	if l.loggerEncoder == 0 {
-		l.logger.Debug(fmt.Sprintln(a...))
+func (l *loggerModule) Notice(a ...interface{}) {
+	if l.level > DebugLevel {
+		return
+	}
+	if loggerEncoder == 0 {
+		defaultLog.Debug(fmt.Sprintln(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorGreen) + "m" + "▶ " + fmt.Sprintln(a...) + "\x1b[0m"
-		l.logger.Debug(msg)
+		msg := "\x1b[" + strconv.Itoa(colorGreen) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		defaultLog.Debug(msg)
 	}
 }
 
-func (l *loggerOpt) Debug(a ...interface{}) {
-	if l.loggerEncoder == 0 {
-		l.logger.Debug(fmt.Sprintln(a...))
+func (l *loggerModule) Debug(a ...interface{}) {
+	if l.level > DebugLevel {
+		return
+	}
+	if loggerEncoder == 0 {
+		defaultLog.Debug(fmt.Sprintln(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorBlue) + "m" + "▶ " + fmt.Sprintln(a...) + "\x1b[0m"
-		l.logger.Debug(msg)
+		msg := "\x1b[" + strconv.Itoa(colorBlue) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		defaultLog.Debug(msg)
 	}
 }
 
-func (l *loggerOpt) Info(a ...interface{}) {
-	if l.loggerEncoder == 0 {
-		l.logger.Info(fmt.Sprintln(a...))
+func (l *loggerModule) Info(a ...interface{}) {
+	if l.level > InfoLevel {
+		return
+	}
+	if loggerEncoder == 0 {
+		defaultLog.Info(fmt.Sprintln(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + fmt.Sprintln(a...) + "\x1b[0m"
-		l.logger.Info(msg)
+		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		defaultLog.Info(msg)
 	}
 }
 
-func (l *loggerOpt) Warn(a ...interface{}) {
-	if l.loggerEncoder == 0 {
-		l.logger.Warn(fmt.Sprintln(a...))
+func (l *loggerModule) Warn(a ...interface{}) {
+	if l.level > WarnLevel {
+		return
+	}
+	if loggerEncoder == 0 {
+		defaultLog.Warn(fmt.Sprintln(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorMagenta) + "m" + "▶ " + fmt.Sprintln(a...) + "\x1b[0m"
-		l.logger.Warn(msg)
+		msg := "\x1b[" + strconv.Itoa(colorMagenta) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		defaultLog.Warn(msg)
 	}
 }
 
-func (l *loggerOpt) Error(a ...interface{}) {
-	if l.loggerEncoder == 0 {
-		l.logger.Error(fmt.Sprintln(a...))
+func (l *loggerModule) Error(a ...interface{}) {
+	if l.level > ErrorLevel {
+		return
+	}
+	if loggerEncoder == 0 {
+		defaultLog.Error(fmt.Sprintln(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorRed) + "m" + "▶ " + fmt.Sprintln(a...) + "\x1b[0m"
-		l.logger.Error(msg)
+		msg := "\x1b[" + strconv.Itoa(colorRed) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		defaultLog.Error(msg)
 	}
 }
 
-func (l *loggerOpt) Fatal(a ...interface{}) {
-	if l.loggerEncoder == 0 {
-		l.logger.Fatal(fmt.Sprintln(a...))
+func (l *loggerModule) Fatal(a ...interface{}) {
+	if l.level > FatalLevel {
+		return
+	}
+	if loggerEncoder == 0 {
+		defaultLog.Fatal(fmt.Sprintln(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + fmt.Sprintln(a...) + "\x1b[0m"
-		l.logger.Fatal(msg)
+		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		defaultLog.Fatal(msg)
 	}
 }
 
-func (l *loggerOpt) Panic(a ...interface{}) {
-	if l.loggerEncoder == 0 {
-		l.logger.Panic(fmt.Sprintln(a...))
+func (l *loggerModule) Panic(a ...interface{}) {
+	if loggerEncoder == 0 {
+		defaultLog.Panic(fmt.Sprintln(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + fmt.Sprintln(a...) + "\x1b[0m"
-		l.logger.Panic(msg)
+		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		defaultLog.Panic(msg)
 	}
 	panic(fmt.Sprintln(a...))
 }
 
-func (l *loggerOpt) ErrStack() {
+func (l *loggerModule) ErrStack() {
 	l.Warn(string(debug.Stack()))
 }
 
-func (l *loggerOpt) SetLogLevel(level int) error {
-	l.logger.SetLevel(logbunny.LogLevel(level))
+func (l *loggerModule) SetLogLevel(level int) error {
+	l.level = level
+	defaultLog.SetLevel(logbunny.LogLevel(level))
 	return nil
 }
 
-func (l *loggerOpt) GetLogger() logbunny.Logger {
-	return l.logger
+func (l *loggerModule) GetLogLevel() int {
+	return l.level
+}
+
+func (l *loggerModule) GetLogger() logbunny.Logger {
+	return defaultLog
 }

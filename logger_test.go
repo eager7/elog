@@ -1,19 +1,16 @@
 package elog_test
 
 import (
-	"github.com/BlockABC/wallet_eth_client/common/elog"
+	"github.com/eager7/elog"
 	"testing"
 )
 
 func TestLogger(t *testing.T) {
-	elog.InitDefaultConfig()
-	if err := elog.Initialize("/tmp/"); err != nil {
-		t.Fatal(err)
-	}
-	elog.Log.Debug("debug ------------------")
-	elog.Log.Info("info   --------------------")
-	elog.Log.Warn("warn   ----------------")
-	elog.Log.Error("error ---------------------")
+	l := elog.NewLogger("example", 0)
+	l.Debug("debug ------------------")
+	l.Info("info   --------------------")
+	l.Warn("warn   ----------------")
+	l.Error("error ---------------------")
 	//l.Panic("panic------------")
-	//elog.Log.ErrStack()
+	//defaultLog.Log.ErrStack()
 }
