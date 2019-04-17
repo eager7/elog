@@ -1,8 +1,10 @@
 package elog
 
 import (
+	"fmt"
 	"github.com/eager7/elog/logbunny"
 	"github.com/spf13/viper"
+	"os"
 )
 
 type loggerOpt struct {
@@ -22,7 +24,20 @@ type loggerOpt struct {
 	logger             logbunny.Logger
 }
 
-func newLoggerOpt() (*loggerOpt, error) {
+func ReadLoggerOpt(file string) *loggerOpt {
+	viper.SetConfigFile(file)
+	initDefaultConfig()
+	if _, err := os.Stat(viper.ConfigFileUsed()); os.IsNotExist(err) {
+		if _, err := os.Create(viper.ConfigFileUsed()); err == nil {
+			if err := viper.WriteConfig(); err != nil {
+				fmt.Println("write err:", err)
+			}
+		} else {
+			fmt.Println("create err:", err)
+		}
+	}
+	_ = viper.ReadInConfig()
+
 	return &loggerOpt{
 		debugLevel:         logbunny.LogLevel(viper.GetInt("log.debug_level")),
 		loggerType:         logbunny.LogType(viper.GetInt("log.loggerType")),
@@ -38,10 +53,10 @@ func newLoggerOpt() (*loggerOpt, error) {
 		rollingTimePattern: viper.GetString("log.rolling_time_pattern"),
 		skip:               viper.GetInt("log.skip"),
 		logger:             nil,
-	}, nil
+	}
 }
 
-func init() {
+func initDefaultConfig() {
 	viper.SetDefault("log.debug_level", 0) //0: debug 1: info 2: warn 3: error 4: panic 5: fatal
 	viper.SetDefault("log.loggerType", 0)  //0: zap 1: logrus
 	viper.SetDefault("log.with_caller", false)

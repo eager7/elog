@@ -71,13 +71,9 @@ func Initialize() error {
 	} else {
 		dir = "/tmp"
 	}
-	flag.Parse()
-	dir += "/log/" + os.Args[0][strings.LastIndex(os.Args[0], `/`)+1:] + "_"
-
-	logOpt, err := newLoggerOpt()
-	if err != nil {
-		return err
-	}
+	process := os.Args[0][strings.LastIndex(os.Args[0], `/`)+1:] + "_"
+	logOpt := ReadLoggerOpt(dir + "/"+process + "config.toml")
+	dir += "/log/" + process
 
 	logFilename := map[logbunny.LogLevel]string{
 		logbunny.DebugLevel: dir + logOpt.debugLogFilename,
