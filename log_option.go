@@ -64,7 +64,7 @@ func initDefaultConfig() {
 	viper.SetDefault("log.time_pattern", "2006-01-02 15:04:05.00000")
 	viper.SetDefault("log.http_port", ":50015")                 // RESTFul API to change logout level dynamically
 	viper.SetDefault("log.debug_log_filename", "debug.log")     //or 'stdout' / 'stderr'
-	viper.SetDefault("log.info_log_filename", "debug.log")      //or 'stdout' / 'stderr'
+	viper.SetDefault("log.info_log_filename", "info.log")       //or 'stdout' / 'stderr'
 	viper.SetDefault("log.warn_log_filename", "warn.log")       //or 'stdout' / 'stderr'
 	viper.SetDefault("log.error_log_filename", "err.log")       //or 'stdout' / 'stderr'
 	viper.SetDefault("log.fatal_log_filename", "fatal.log")     //or 'stdout' / 'stderr'
