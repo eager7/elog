@@ -2,9 +2,9 @@
 从uber改造的log库
 
 ## 获取
-go get
+`go get github.com/eager7/elog`
 
-##使用
+## 使用
 new一个log出来用即可，会在程序执行目录下生成一个elog.toml的配置文件，自行修改对应参数即可
 ```
 func TestLogger(t *testing.T) {
@@ -17,7 +17,7 @@ func TestLogger(t *testing.T) {
 	//defaultLog.Log.ErrStack()
 }
 ```
-##参数
+## 参数
 下面是默认参数
 ```
 	viper.SetDefault("log.debug_level", 0) //0: debug 1: info 2: warn 3: error 4: panic 5: fatal
