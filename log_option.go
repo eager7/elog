@@ -3,6 +3,7 @@ package elog
 import (
 	"fmt"
 	"github.com/eager7/elog/logbunny"
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"os"
 )
@@ -37,6 +38,7 @@ func ReadLoggerOpt(file string) *loggerOpt {
 		}
 	}
 	_ = viper.ReadInConfig()
+	go watchConfig(file)
 
 	return &loggerOpt{
 		debugLevel:         logbunny.LogLevel(viper.GetInt("log.debug_level")),
@@ -71,4 +73,21 @@ func initDefaultConfig() {
 	viper.SetDefault("log.rolling_time_pattern", "0 0 0 * * *") //rolling the log everyday at 00:00:00
 	viper.SetDefault("log.skip", 4)                             //call depth, zap log is 3, logger is 4
 	viper.SetDefault("log.to_terminal", true)                   //out put to terminal
+}
+
+func watchConfig(file string) {
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Println("config file changed:", e.Name)
+		viper.SetConfigFile(file)
+		if err := viper.ReadInConfig(); err != nil {
+			fmt.Println("retry read config file error:", err)
+		} else {
+			level := int(viper.GetInt("log.debug_level"))
+			fmt.Println("new config:", level)
+			if level >= 0 && level <= FatalLevel && level != gLevel {
+				gLevel = level
+			}
+		}
+	})
 }

@@ -18,13 +18,16 @@ var loggerEncoder logbunny.EncoderType
 
 // Zap & logrus level is not the same so we defined our level
 const (
-	DebugLevel = iota
+	NoticeLevel = iota
+	DebugLevel
 	InfoLevel
 	WarnLevel
 	ErrorLevel
 	PanicLevel
 	FatalLevel
 )
+
+var gLevel = NoticeLevel
 
 const (
 	colorRed = iota + 91
@@ -139,7 +142,7 @@ func stdOutput(logPath string) *os.File {
 }
 
 func (l *loggerModule) Notice(a ...interface{}) {
-	if l.level > DebugLevel {
+	if l.level > NoticeLevel || gLevel > NoticeLevel {
 		return
 	}
 	if loggerEncoder == 0 {
@@ -151,7 +154,7 @@ func (l *loggerModule) Notice(a ...interface{}) {
 }
 
 func (l *loggerModule) Debug(a ...interface{}) {
-	if l.level > DebugLevel {
+	if l.level > DebugLevel || gLevel > DebugLevel {
 		return
 	}
 	if loggerEncoder == 0 {
@@ -163,7 +166,7 @@ func (l *loggerModule) Debug(a ...interface{}) {
 }
 
 func (l *loggerModule) Info(a ...interface{}) {
-	if l.level > InfoLevel {
+	if l.level > InfoLevel || gLevel > InfoLevel {
 		return
 	}
 	if loggerEncoder == 0 {
@@ -175,7 +178,7 @@ func (l *loggerModule) Info(a ...interface{}) {
 }
 
 func (l *loggerModule) Warn(a ...interface{}) {
-	if l.level > WarnLevel {
+	if l.level > WarnLevel || gLevel > WarnLevel {
 		return
 	}
 	if loggerEncoder == 0 {
@@ -187,7 +190,7 @@ func (l *loggerModule) Warn(a ...interface{}) {
 }
 
 func (l *loggerModule) Error(a ...interface{}) {
-	if l.level > ErrorLevel {
+	if l.level > ErrorLevel || gLevel > ErrorLevel {
 		return
 	}
 	if loggerEncoder == 0 {
@@ -199,7 +202,7 @@ func (l *loggerModule) Error(a ...interface{}) {
 }
 
 func (l *loggerModule) Fatal(a ...interface{}) {
-	if l.level > FatalLevel {
+	if l.level > FatalLevel || gLevel > FatalLevel {
 		return
 	}
 	if loggerEncoder == 0 {
