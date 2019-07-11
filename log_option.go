@@ -13,6 +13,7 @@ type loggerOpt struct {
 	loggerType         logbunny.LogType
 	withCaller         bool
 	toTerminal         bool
+	toFile             bool
 	loggerEncoder      logbunny.EncoderType
 	timePattern        string
 	debugLogFilename   string
@@ -28,15 +29,6 @@ type loggerOpt struct {
 func ReadLoggerOpt(file string) *loggerOpt {
 	viper.SetConfigFile(file)
 	initDefaultConfig()
-	if _, err := os.Stat(viper.ConfigFileUsed()); os.IsNotExist(err) {
-		if _, err := os.Create(viper.ConfigFileUsed()); err == nil {
-			if err := viper.WriteConfig(); err != nil {
-				fmt.Println("write err:", err)
-			}
-		} else {
-			fmt.Println("create err:", err)
-		}
-	}
 	_ = viper.ReadInConfig()
 	go watchConfig(file)
 
@@ -45,6 +37,7 @@ func ReadLoggerOpt(file string) *loggerOpt {
 		loggerType:         logbunny.LogType(viper.GetInt("log.loggerType")),
 		withCaller:         viper.GetBool("log.with_caller"),
 		toTerminal:         viper.GetBool("log.to_terminal"),
+		toFile:             viper.GetBool("log.to_file"),
 		loggerEncoder:      logbunny.EncoderType(viper.GetInt("log.logger_encoder")),
 		timePattern:        viper.GetString("log.time_pattern"),
 		debugLogFilename:   viper.GetString("log.debug_log_filename"),
@@ -55,6 +48,18 @@ func ReadLoggerOpt(file string) *loggerOpt {
 		rollingTimePattern: viper.GetString("log.rolling_time_pattern"),
 		skip:               viper.GetInt("log.skip"),
 		logger:             nil,
+	}
+}
+
+func WriteLoggerOpt() {
+	if _, err := os.Stat(viper.ConfigFileUsed()); os.IsNotExist(err) {
+		if _, err := os.Create(viper.ConfigFileUsed()); err == nil {
+			if err := viper.WriteConfig(); err != nil {
+				fmt.Println("write err:", err)
+			}
+		} else {
+			fmt.Println("create err:", err)
+		}
 	}
 }
 
@@ -73,6 +78,7 @@ func initDefaultConfig() {
 	viper.SetDefault("log.rolling_time_pattern", "0 0 0 * * *") //rolling the log everyday at 00:00:00
 	viper.SetDefault("log.skip", 4)                             //call depth, zap log is 3, logger is 4
 	viper.SetDefault("log.to_terminal", true)                   //out put to terminal
+	viper.SetDefault("log.to_file", false)                      //out put to file
 }
 
 func watchConfig(file string) {

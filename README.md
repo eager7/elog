@@ -5,7 +5,7 @@
 `go get github.com/eager7/elog`
 
 ## 使用
-new一个log出来用即可，会在程序执行目录下生成一个elog.toml的配置文件，自行修改对应参数即可
+new一个log出来用即可
 ```
 func TestLogger(t *testing.T) {
 	l := elog.NewLogger("example", 0)
@@ -16,6 +16,11 @@ func TestLogger(t *testing.T) {
 	//l.Panic("panic------------")
 	//defaultLog.Log.ErrStack()
 }
+```
+## 配置
+如果需要做配置，那么执行一下函数`WriteLoggerOpt`就会在程序执行目录下生成一个`elog.toml`文件，可以自行修改内部参数。
+```bash
+elog.WriteLoggerOpt()
 ```
 ## 参数
 下面是默认参数
@@ -33,5 +38,6 @@ func TestLogger(t *testing.T) {
 	viper.SetDefault("log.fatal_log_filename", "fatal.log")     //or 'stdout' / 'stderr'
 	viper.SetDefault("log.rolling_time_pattern", "0 0 0 * * *") //rolling the log everyday at 00:00:00
 	viper.SetDefault("log.skip", 4)                             //call depth, zap log is 3, logger is 4
-	viper.SetDefault("log.to_terminal", true)                   //out put to terminal
+	viper.SetDefault("log.to_terminal", true)                   //将打印信息输出到终端，如果设置为false，则不会输出到终端
+	viper.SetDefault("log.to_file", true)                       //将打印信息输出到文件，如果设置为false，则不会输出到文件，文件目录为程序所在目录下的elog
   ```

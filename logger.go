@@ -88,16 +88,20 @@ func Initialize() error {
 
 	outputWriter := make(map[logbunny.LogLevel][]io.Writer)
 	for level, file := range logFilename {
-		logFileWriter, err := newLogFile(file, logOpt.rollingTimePattern)
-		if err != nil {
-			return err
-		}
+		var writer []io.Writer
 		if logOpt.toTerminal {
-			outputWriter[level] = []io.Writer{logFileWriter, os.Stdout}
-		} else {
-			outputWriter[level] = []io.Writer{logFileWriter}
+			writer = append(writer, os.Stdout)
 		}
+		if logOpt.toFile {
+			logFileWriter, err := newLogFile(file, logOpt.rollingTimePattern)
+			if err != nil {
+				return err
+			}
+			writer = append(writer, logFileWriter)
+		}
+		outputWriter[level] = writer
 	}
+
 	loggerEncoder = logOpt.loggerEncoder
 	zapCfg := &logbunny.Config{
 		Type:        logOpt.loggerType,
@@ -239,4 +243,8 @@ func (l *loggerModule) GetLogLevel() int {
 
 func (l *loggerModule) GetLogger() logbunny.Logger {
 	return defaultLog
+}
+
+func (l *loggerModule) WriteOptionToFile() {
+	WriteLoggerOpt()
 }

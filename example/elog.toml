@@ -1,0 +1,17 @@
+
+[log]
+  debug_level = 0
+  debug_log_filename = "debug.log"
+  error_log_filename = "err.log"
+  fatal_log_filename = "fatal.log"
+  http_port = ":50015"
+  info_log_filename = "info.log"
+  logger_encoder = 1
+  loggertype = 0
+  rolling_time_pattern = "0 0 0 * * *"
+  skip = 4
+  time_pattern = "2006-01-02 15:04:05.00000"
+  to_file = true 
+  to_terminal = true
+  warn_log_filename = "warn.log"
+  with_caller = false
