@@ -74,8 +74,9 @@ func Initialize() error {
 	} else {
 		dir = "/tmp"
 	}
-	//process := os.Args[0][strings.LastIndex(os.Args[0], `/`)+1:] + "_"
-	logOpt := ReadLoggerOpt(dir + "/" + "elog.toml")
+	process := os.Args[0][strings.LastIndex(os.Args[0], `/`)+1:]
+	fmt.Println("process name:", process)
+	logOpt := ReadLoggerOpt(dir + "/" + process + ".toml")
 	dir += "/log/" + "elog_"
 
 	logFilename := map[logbunny.LogLevel]string{
