@@ -246,6 +246,10 @@ func (l *loggerModule) GetGlobalLevel() int {
 	return gLevel
 }
 
+func (l *loggerModule) GetLogMode() bool {
+	return l.level >= gLevel
+}
+
 func (l *loggerModule) GetLogger() logbunny.Logger {
 	return defaultLog
 }
