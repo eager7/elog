@@ -238,19 +238,19 @@ func (l *loggerModule) SetLogLevel(level int) error {
 	return nil
 }
 
-func (l *loggerModule) GetLogLevel() int {
+func (l *loggerModule) LogLevel() int {
 	return l.level
 }
 
-func (l *loggerModule) GetGlobalLevel() int {
+func (l *loggerModule) GlobalLevel() int {
 	return gLevel
 }
 
-func (l *loggerModule) GetLogMode() bool {
+func (l *loggerModule) LogMode() bool {
 	return l.level >= gLevel
 }
 
-func (l *loggerModule) GetLogger() logbunny.Logger {
+func (l *loggerModule) Logger() logbunny.Logger {
 	return defaultLog
 }
 
