@@ -77,6 +77,7 @@ func Initialize() error {
 	process := os.Args[0][strings.LastIndex(os.Args[0], `/`)+1:]
 	fmt.Println("process name:", process)
 	logOpt := ReadLoggerOpt(dir + "/" + process + ".yaml")
+	gLevel = int(logOpt.debugLevel)
 	dir += "/log/" + "elog_"
 
 	logFilename := map[logbunny.LogLevel]string{
