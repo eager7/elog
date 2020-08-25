@@ -2,8 +2,8 @@ package elog
 
 import (
 	"flag"
-	"fmt"
 	"github.com/eager7/elog/bunnystub"
+	"github.com/eager7/elog/efmt"
 	"github.com/eager7/elog/logbunny"
 	"io"
 	"os"
@@ -75,7 +75,7 @@ func Initialize() error {
 		dir = "/tmp"
 	}
 	process := os.Args[0][strings.LastIndex(os.Args[0], `/`)+1:]
-	fmt.Println("process name:", process)
+	efmt.Println("process name:", process)
 	logOpt := ReadLoggerOpt(dir + "/" + process + ".yaml")
 	gLevel = int(logOpt.debugLevel)
 	dir += "/log/" + "elog_"
@@ -152,9 +152,9 @@ func (l *loggerModule) Notice(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Debug(fmt.Sprint(a...))
+		defaultLog.Debug(efmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorGreen) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorGreen) + "m" + "▶ " + "[" + l.name + "] " + efmt.Sprintln(a...) + "\x1b[0m"
 		defaultLog.Debug(msg)
 	}
 }
@@ -164,9 +164,9 @@ func (l *loggerModule) Debug(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Debug(fmt.Sprint(a...))
+		defaultLog.Debug(efmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorBlue) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorBlue) + "m" + "▶ " + "[" + l.name + "] " + efmt.Sprintln(a...) + "\x1b[0m"
 		defaultLog.Debug(msg)
 	}
 }
@@ -176,9 +176,9 @@ func (l *loggerModule) Info(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Info(fmt.Sprint(a...))
+		defaultLog.Info(efmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + efmt.Sprintln(a...) + "\x1b[0m"
 		defaultLog.Info(msg)
 	}
 }
@@ -188,9 +188,9 @@ func (l *loggerModule) Warn(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Warn(fmt.Sprint(a...))
+		defaultLog.Warn(efmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorMagenta) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorMagenta) + "m" + "▶ " + "[" + l.name + "] " + efmt.Sprintln(a...) + "\x1b[0m"
 		defaultLog.Warn(msg)
 	}
 }
@@ -200,9 +200,9 @@ func (l *loggerModule) Error(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Error(fmt.Sprint(a...))
+		defaultLog.Error(efmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorRed) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorRed) + "m" + "▶ " + "[" + l.name + "] " + efmt.Sprintln(a...) + "\x1b[0m"
 		defaultLog.Error(msg)
 	}
 }
@@ -212,21 +212,21 @@ func (l *loggerModule) Fatal(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Fatal(fmt.Sprint(a...))
+		defaultLog.Fatal(efmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + efmt.Sprintln(a...) + "\x1b[0m"
 		defaultLog.Fatal(msg)
 	}
 }
 
 func (l *loggerModule) Panic(a ...interface{}) {
 	if loggerEncoder == 0 {
-		defaultLog.Panic(fmt.Sprint(a...))
+		defaultLog.Panic(efmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + efmt.Sprintln(a...) + "\x1b[0m"
 		defaultLog.Panic(msg)
 	}
-	panic(fmt.Sprint(a...))
+	panic(efmt.Sprint(a...))
 }
 
 func (l *loggerModule) ErrStack() {
