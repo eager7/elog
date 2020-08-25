@@ -7,7 +7,7 @@ import (
 
 func TestLogger(t *testing.T) {
 	l := elog.NewLogger("example", 0)
-	l.Debug("debug ------------------")
+	l.Debug(1, "debug ------------------", 2)
 	l.Info("info   --------------------")
 	l.Warn("warn   ----------------")
 	l.Error("error ---------------------")
