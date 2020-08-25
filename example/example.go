@@ -20,6 +20,6 @@ func main() {
 	time.Sleep(time.Second * 3)
 }
 
-func init(){
+func init() {
 	elog.WriteLoggerOpt()
 }

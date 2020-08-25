@@ -152,9 +152,9 @@ func (l *loggerModule) Notice(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Debug(fmt.Sprintln(a...))
+		defaultLog.Debug(fmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorGreen) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorGreen) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprint(a...) + "\x1b[0m"
 		defaultLog.Debug(msg)
 	}
 }
@@ -164,9 +164,9 @@ func (l *loggerModule) Debug(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Debug(fmt.Sprintln(a...))
+		defaultLog.Debug(fmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorBlue) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorBlue) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprint(a...) + "\x1b[0m"
 		defaultLog.Debug(msg)
 	}
 }
@@ -176,9 +176,9 @@ func (l *loggerModule) Info(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Info(fmt.Sprintln(a...))
+		defaultLog.Info(fmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprint(a...) + "\x1b[0m"
 		defaultLog.Info(msg)
 	}
 }
@@ -188,9 +188,9 @@ func (l *loggerModule) Warn(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Warn(fmt.Sprintln(a...))
+		defaultLog.Warn(fmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorMagenta) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorMagenta) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprint(a...) + "\x1b[0m"
 		defaultLog.Warn(msg)
 	}
 }
@@ -200,9 +200,9 @@ func (l *loggerModule) Error(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Error(fmt.Sprintln(a...))
+		defaultLog.Error(fmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorRed) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorRed) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprint(a...) + "\x1b[0m"
 		defaultLog.Error(msg)
 	}
 }
@@ -212,21 +212,21 @@ func (l *loggerModule) Fatal(a ...interface{}) {
 		return
 	}
 	if loggerEncoder == 0 {
-		defaultLog.Fatal(fmt.Sprintln(a...))
+		defaultLog.Fatal(fmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprint(a...) + "\x1b[0m"
 		defaultLog.Fatal(msg)
 	}
 }
 
 func (l *loggerModule) Panic(a ...interface{}) {
 	if loggerEncoder == 0 {
-		defaultLog.Panic(fmt.Sprintln(a...))
+		defaultLog.Panic(fmt.Sprint(a...))
 	} else {
-		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprintln(a...) + "\x1b[0m"
+		msg := "\x1b[" + strconv.Itoa(colorYellow) + "m" + "▶ " + "[" + l.name + "] " + fmt.Sprint(a...) + "\x1b[0m"
 		defaultLog.Panic(msg)
 	}
-	panic(fmt.Sprintln(a...))
+	panic(fmt.Sprint(a...))
 }
 
 func (l *loggerModule) ErrStack() {

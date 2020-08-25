@@ -185,8 +185,8 @@ func (m *IOManager) IgnoreOK() bool        { return m.IsIgnoreOK }
 func (m *IOManager) Compress() bool        { return m.IsCompress }
 func (m *IOManager) NameParts() []string   { return []string{m.FilePath, m.Prefix, m.Suffix} }
 func (m *IOManager) FileMode() os.FileMode { return m.FileMod }
-func (m *IOManager) Concurrency() int       { return m.concurrency }
-func (m *IOManager) Spinning() bool         { return m.spinning }
+func (m *IOManager) Concurrency() int      { return m.concurrency }
+func (m *IOManager) Spinning() bool        { return m.spinning }
 
 func (m *IOManager) parseVolume() {
 	s := []byte(strings.ToUpper(m.RollingVolumeSize))
