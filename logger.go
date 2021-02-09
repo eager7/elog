@@ -258,3 +258,23 @@ func (l *loggerModule) Logger() logbunny.Logger {
 func (l *loggerModule) WriteOptionToFile() {
 	WriteLoggerOpt()
 }
+
+func (l *loggerModule) Noticef(format string, a ...interface{}) {
+	l.Notice(fmt.Sprintf(format, a...))
+}
+
+func (l *loggerModule) Debugf(format string, a ...interface{}) {
+	l.Debug(fmt.Sprintf(format, a...))
+}
+
+func (l *loggerModule) Infof(format string, a ...interface{}) {
+	l.Info(fmt.Sprintf(format, a...))
+}
+
+func (l *loggerModule) Warnf(format string, a ...interface{}) {
+	l.Warn(fmt.Sprintf(format, a...))
+}
+
+func (l *loggerModule) Errorf(format string, a ...interface{}) {
+	l.Error(fmt.Sprintf(format, a...))
+}
